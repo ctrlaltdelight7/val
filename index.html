@@ -115,15 +115,16 @@
       margin: 10px 0;
     }
 
-    .fireworks {
-      width: min(380px, 90vw);
-      margin: 0 auto;
-      display: block;
-    }
-
     @keyframes pop {
       from { transform: scale(.96); opacity: 0; }
       to { transform: scale(1); opacity: 1; }
+    }
+
+    /* Optional: confetti container for mobile visual */
+    .fireworks {
+      width: 100%;
+      height: 200px;
+      pointer-events: none;
     }
   </style>
 </head>
@@ -176,11 +177,7 @@
 
     <section class="result" id="result">
       <h2>YAY! 🎉</h2>
-      <img
-        class="fireworks"
-        src="https://media.giphy.com/media/26ufdipQqU2lhNA4g/giphy.gif"
-        alt="Fireworks"
-      />
+      <div class="fireworks"></div>
     </section>
   </main>
 
@@ -243,10 +240,6 @@
     }
 
     /* ---------- NO BUTTON MOVES SMOOTHLY AVOIDING YES ---------- */
-    function clamp(n, min, max) {
-      return Math.max(min, Math.min(max, n));
-    }
-
     function moveNoSmoothly() {
       const z = zone.getBoundingClientRect();
       const yesRect = yesBtn.getBoundingClientRect();
@@ -271,7 +264,6 @@
         if (!overlap) safe = true;
       }
 
-      // Smoothly move using CSS transition
       noBtn.style.left = newLeft + "px";
       noBtn.style.top = newTop + "px";
 
@@ -294,10 +286,3 @@
   </script>
 </body>
 </html>
-
-
-
-
-
-
-

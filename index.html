@@ -277,15 +277,24 @@
 
       growYes();
     }
+function moveNoRandomly() {
+  const z = zone.getBoundingClientRect();
+  const b = noBtn.getBoundingClientRect();
 
-    zone.addEventListener("pointermove", e => {
-      const b = noBtn.getBoundingClientRect();
-      const d = Math.hypot(
-        (b.left + b.width / 2) - e.clientX,
-        (b.top + b.height / 2) - e.clientY
-      );
-      if (d < 140) moveNo(e.clientX, e.clientY);
-    });
+  // Random new position within the button zone
+  const newLeft = Math.random() * (z.width - b.width);
+  const newTop = Math.random() * (z.height - b.height);
+
+  noBtn.style.left = newLeft + "px";
+  noBtn.style.top = newTop + "px";
+  noBtn.style.transform = "none";
+
+  growYes(); // Optional: still make YES grow
+}
+
+// Move the "No" button every 800ms (adjust as needed)
+setInterval(moveNoRandomly, 800);
+    
 
     noBtn.addEventListener("click", e => e.preventDefault());
 
@@ -300,6 +309,7 @@
   </script>
 </body>
 </html>
+
 
 
 

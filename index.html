@@ -82,7 +82,7 @@
       box-shadow: 0 10px 24px rgba(0,0,0,.14);
       user-select: none;
       -webkit-tap-highlight-color: transparent;
-      transition: transform .12s ease, background .12s ease;
+      transition: transform 0.3s ease, left 0.6s ease, top 0.6s ease, background .12s ease;
     }
 
     #yesBtn {
@@ -213,7 +213,6 @@
 
     function fullScreenConfetti() {
       const end = Date.now() + 1600;
-
       (function frame() {
         confettiInstance({
           particleCount: 12,
@@ -243,34 +242,51 @@
       yesBtn.style.transform = `translateY(-50%) scale(${yesScale})`;
     }
 
-    /* ---------- NO BUTTON MOVES RANDOMLY ---------- */
+    /* ---------- NO BUTTON MOVES SMOOTHLY AVOIDING YES ---------- */
     function clamp(n, min, max) {
       return Math.max(min, Math.min(max, n));
     }
 
-    function moveNoRandomly() {
+    function moveNoSmoothly() {
       const z = zone.getBoundingClientRect();
+      const yesRect = yesBtn.getBoundingClientRect();
       const b = noBtn.getBoundingClientRect();
 
-      const newLeft = Math.random() * (z.width - b.width);
-      const newTop = Math.random() * (z.height - b.height);
+      let newLeft, newTop, safe = false;
 
+      while (!safe) {
+        newLeft = Math.random() * (z.width - b.width);
+        newTop = Math.random() * (z.height - b.height);
+
+        const yesLeft = yesRect.left - z.left;
+        const yesTop = yesRect.top - z.top;
+
+        const overlap = !(
+          newLeft + b.width < yesLeft ||
+          newLeft > yesLeft + yesRect.width ||
+          newTop + b.height < yesTop ||
+          newTop > yesTop + yesRect.height
+        );
+
+        if (!overlap) safe = true;
+      }
+
+      // Smoothly move using CSS transition
       noBtn.style.left = newLeft + "px";
       noBtn.style.top = newTop + "px";
-      noBtn.style.transform = "none";
 
       growYes();
     }
 
-    // Move "No" button every 800ms
-    setInterval(moveNoRandomly, 450);
+    // Move "No" button every 1s
+    setInterval(moveNoSmoothly, 1000);
 
     noBtn.addEventListener("click", e => e.preventDefault());
 
     /* ---------- YES CLICK ---------- */
     yesBtn.addEventListener("click", () => {
       zone.style.display = "none";
-      hint.style.display = "none";     // HIDE THE HINT
+      hint.style.display = "none";     
       result.style.display = "block";
       resizeConfettiCanvas();
       fullScreenConfetti();
@@ -278,6 +294,7 @@
   </script>
 </body>
 </html>
+
 
 
 

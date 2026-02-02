@@ -30,7 +30,6 @@
       padding: 16px;
     }
 
-    /* FULL-SCREEN CONFETTI CANVAS */
     #confettiCanvas {
       position: fixed;
       inset: 0;
@@ -83,7 +82,7 @@
       box-shadow: 0 10px 24px rgba(0,0,0,.14);
       user-select: none;
       -webkit-tap-highlight-color: transparent;
-      transition: transform .12s ease, background .12s ease;
+      transition: transform 0.3s ease, left 0.6s ease, top 0.6s ease, background .12s ease;
     }
 
     #yesBtn {
@@ -133,7 +132,6 @@
   <canvas id="confettiCanvas"></canvas>
 
   <main class="card">
-    <!-- ANIMAL WITH HEART -->
     <svg class="art" viewBox="0 0 320 240" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <linearGradient id="fur" x1="0" x2="1">
@@ -151,19 +149,15 @@
                C314 78 282 92 282 106
                C282 92 250 78 250 50Z"
             fill="url(#heart)"/>
-
       <path d="M90 120 C90 70 140 40 190 60
                C240 40 290 70 290 120
                C290 180 240 210 190 210
                C140 210 90 180 90 120Z"
             fill="url(#fur)"/>
-
       <path d="M110 92 L95 55 L140 78 Z" fill="#f2a97b"/>
       <path d="M270 92 L285 55 L240 78 Z" fill="#f2a97b"/>
-
       <circle cx="160" cy="130" r="8"/>
       <circle cx="220" cy="130" r="8"/>
-
       <path d="M190 144 C186 144 182 148 182 152
                C182 160 190 164 190 170
                C190 164 198 160 198 152
@@ -178,7 +172,6 @@
       <button id="noBtn">No</button>
     </section>
 
-    <!-- HINT -->
     <div class="hint" id="hint">“No” seems a bit shy 😈</div>
 
     <section class="result" id="result">
@@ -220,7 +213,6 @@
 
     function fullScreenConfetti() {
       const end = Date.now() + 1600;
-
       (function frame() {
         confettiInstance({
           particleCount: 12,
@@ -250,49 +242,51 @@
       yesBtn.style.transform = `translateY(-50%) scale(${yesScale})`;
     }
 
-    /* ---------- NO BUTTON RUNS AWAY ---------- */
+    /* ---------- NO BUTTON MOVES SMOOTHLY AVOIDING YES ---------- */
     function clamp(n, min, max) {
       return Math.max(min, Math.min(max, n));
     }
 
-    function moveNo(px, py) {
+    function moveNoSmoothly() {
       const z = zone.getBoundingClientRect();
+      const yesRect = yesBtn.getBoundingClientRect();
       const b = noBtn.getBoundingClientRect();
 
-      let dx = (b.left + b.width / 2) - px;
-      let dy = (b.top + b.height / 2) - py;
-      let mag = Math.hypot(dx, dy) || 1;
-      dx /= mag;
-      dy /= mag;
+      let newLeft, newTop, safe = false;
 
-      let newLeft = (b.left - z.left) + dx * 150;
-      let newTop  = (b.top - z.top) + dy * 150;
+      while (!safe) {
+        newLeft = Math.random() * (z.width - b.width);
+        newTop = Math.random() * (z.height - b.height);
 
-      newLeft = clamp(newLeft, 0, z.width - b.width);
-      newTop  = clamp(newTop, 0, z.height - b.height);
+        const yesLeft = yesRect.left - z.left;
+        const yesTop = yesRect.top - z.top;
 
+        const overlap = !(
+          newLeft + b.width < yesLeft ||
+          newLeft > yesLeft + yesRect.width ||
+          newTop + b.height < yesTop ||
+          newTop > yesTop + yesRect.height
+        );
+
+        if (!overlap) safe = true;
+      }
+
+      // Smoothly move using CSS transition
       noBtn.style.left = newLeft + "px";
       noBtn.style.top = newTop + "px";
-      noBtn.style.transform = "none";
 
       growYes();
     }
 
-    zone.addEventListener("pointermove", e => {
-      const b = noBtn.getBoundingClientRect();
-      const d = Math.hypot(
-        (b.left + b.width / 2) - e.clientX,
-        (b.top + b.height / 2) - e.clientY
-      );
-      if (d < 140) moveNo(e.clientX, e.clientY);
-    });
+    // Move "No" button every 1s
+    setInterval(moveNoSmoothly, 1000);
 
     noBtn.addEventListener("click", e => e.preventDefault());
 
     /* ---------- YES CLICK ---------- */
     yesBtn.addEventListener("click", () => {
       zone.style.display = "none";
-      hint.style.display = "none";     // HIDE THE HINT
+      hint.style.display = "none";     
       result.style.display = "block";
       resizeConfettiCanvas();
       fullScreenConfetti();
@@ -300,4 +294,7 @@
   </script>
 </body>
 </html>
+
+
+
 
